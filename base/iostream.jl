@@ -488,18 +488,15 @@ function readbytes!(s::IOStream, b::Array{UInt8}, nb=length(b); all::Bool=true)
 end
 
 function read(s::IOStream)
-    sz = 0
-    try # filesize is just a hint, so ignore if it fails
-        sz = filesize(s)
-        pos = ccall(:ios_pos, Int64, (Ptr{Cvoid},), s.ios)
-        if pos > 0
-            sz -= pos
-        end
-    catch
+    sz = filesize(s)
+    pos = ccall(:ios_pos, Int64, (Ptr{Cvoid},), s.ios)
+    if pos > 0
+        sz -= pos
     end
-    b = StringVector(sz<=0 ? 1024 : sz)
+    b = StringVector(sz <= 0 ? 1024 : sz)
     nr = readbytes_all!(s, b, typemax(Int))
     resize!(b, nr)
+    return b
 end
 
 """
@@ -518,6 +515,7 @@ function read(s::IOStream, nb::Integer; all::Bool=true)
     b = Vector{UInt8}(undef, all && nb == typemax(Int) ? 1024 : nb)
     nr = readbytes!(s, b, nb, all=all)
     resize!(b, nr)
+    return b
 end
 
 ## peek ##

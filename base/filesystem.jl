@@ -95,10 +95,10 @@ end
 
 function close(f::File)
     if isopen(f)
-        err = ccall(:jl_fs_close, Int32, (OS_HANDLE,), f.handle)
-        uv_error("close", err)
-        f.handle = INVALID_OS_HANDLE
         f.open = false
+        err = ccall(:jl_fs_close, Int32, (OS_HANDLE,), f.handle)
+        f.handle = INVALID_OS_HANDLE
+        uv_error("close", err)
     end
     nothing
 end

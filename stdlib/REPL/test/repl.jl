@@ -745,7 +745,12 @@ let exename = Base.julia_cmd()
         output = readuntil(pty_master, ' ', keep=true)
         @test output == "1\r\nexit()\r\n1\r\n\r\njulia> "
         @test bytesavailable(pty_master) == 0
-        @test eof(pty_master)
+        @test try # possibly consume child-exited notification
+                eof(pty_master)
+            catch ex
+                (ex isa Base.IOError && ex.code == Base.UV_EIO) || rethrow()
+                eof(pty_master)
+            end
         @test read(pty_master, String) == ""
         wait(p)
     end

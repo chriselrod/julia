@@ -488,10 +488,17 @@ function readbytes!(s::IOStream, b::Array{UInt8}, nb=length(b); all::Bool=true)
 end
 
 function read(s::IOStream)
-    sz = filesize(s)
-    pos = ccall(:ios_pos, Int64, (Ptr{Cvoid},), s.ios)
-    if pos > 0
-        sz -= pos
+    sz = try # filesize is just a hint, so ignore if `fstat` fails
+            filesize(s)
+        catch ex
+            ex isa IOError || rethrow()
+            Int64(0)
+        end
+    if sz > 0
+        pos = ccall(:ios_pos, Int64, (Ptr{Cvoid},), s.ios)
+        if pos > 0
+            sz -= pos
+        end
     end
     b = StringVector(sz <= 0 ? 1024 : sz)
     nr = readbytes_all!(s, b, typemax(Int))

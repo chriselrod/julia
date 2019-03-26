@@ -91,12 +91,12 @@ function challenge_prompt(cmd::Cmd, challenges; timeout::Integer=60, debug::Bool
             write(out, pty_master)
         catch ex
             if !(ex isa Base.IOError && ex.code == Base.UV_EIO)
-                rethrow(ex) # ignore EIO from master after slave dies
+                rethrow() # ignore EIO from master after slave dies
             end
         end
 
         status = fetch(timer)
-        close(master)
+        close(pty_master)
         if status != :success
             if status == :timeout
                 error("Process timed out possibly waiting for a response. ",

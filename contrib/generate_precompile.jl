@@ -48,7 +48,7 @@ end
 
 function generate_precompile_statements()
     start_time = time()
-    debug_output = stdout # or devnull
+    debug_output = devnull # or stdout
 
     # Precompile a package
     mktempdir() do prec_path
@@ -99,7 +99,10 @@ function generate_precompile_statements()
                 Sys.iswindows() && (sleep(0.1); yield(); yield()) # workaround hang - probably a libuv issue?
                 write(output_copy, l)
             end
+            close(output_copy)
+            close(pty_master)
         catch ex
+            close(output_copy)
             close(pty_master)
             if !(ex isa Base.IOError && ex.code == Base.UV_EIO)
                 rethrow() # ignore EIO on pty_master after pty_slave dies

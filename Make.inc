@@ -815,10 +815,10 @@ JCPPFLAGS+=-DSYSTEM_LIBUNWIND
 endif
 else
 ifeq ($(OS),Darwin)
-LIBUNWIND:=$(build_libdir)/libosxunwind.a
+LIBUNWIND:=-L$(build_libdir) -losxunwind
 JCPPFLAGS+=-DLIBOSXUNWIND
 else
-LIBUNWIND:=$(build_libdir)/libunwind-generic.a $(build_libdir)/libunwind.a
+LIBUNWIND:=-L$(build_libdir) -lunwind-generic -lunwind
 endif
 endif
 endif
